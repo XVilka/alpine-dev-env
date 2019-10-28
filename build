@@ -1,0 +1,28 @@
+#!/bin/sh
+# shellcheck disable=SC2039
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}" )" && pwd )"
+DOTDIR="$DIR/dotfiles"
+DOTFILES="$HOME/dotfiles"
+DOTLIST="$DOTFILES/configfiles.json"
+SYNCPY="$DOTFILES/sync.py"
+NVIMCONFDIR=".local/share/nvim/site"
+VIMDIR="$DOTDIR/$NVIMCONFDIR"
+
+if [ -d dotfiles ]; then
+    if [ -f "$SYNCPY" ]; then
+		echo "Running sync.py -c -t docker -p \"$DOTDIR\" -l \"$DOTLIST\" ..."
+		"$SYNCPY" -c -t docker -p "$DOTDIR" -l "$DOTLIST" || exit 1
+	fi
+	# Now install vim-plug
+	# Copy if exists in the $HOME directory, otherwise - download
+	VIMPLUG="$HOME/$NVIMCONFDIR/autoload/plug.vim"
+	if [ -f "$VIMPLUG" ]; then
+		echo "Using the local Plug.vim copy"
+		cp "$VIMPLUG" "$VIMDIR/autoload/plug.vim" || exit 1
+	else
+		curl -fLo "$VIMDIR/autoload/plug.vim" --create-dirs \
+			https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim || exit 1
+	fi
+fi
+
+docker build -t alpine-dev .

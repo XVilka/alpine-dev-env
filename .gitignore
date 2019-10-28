@@ -1,0 +1,6 @@
+dotfiles/*
+.*.swp
+.*.swo
+.*.swn
+*.un~
+*.log
