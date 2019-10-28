@@ -7,9 +7,12 @@ ARG realname="Anton Kochkov"
 ARG email="anton.kochkov@gmail.com"
 ARG keyname="anton.kochkov@gmail.com-5db6cdc1"
 
-# TODO: Add antibody
+# Enable "testing" repository
+RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> \
+	/etc/apk/repositories
+
 RUN apk add --no-cache alpine-sdk bash bash-doc bash-completion \
-	coreutils man python3 python3-dev tmux neovim tig zsh mc
+	zsh zsh-vcs coreutils man python3 python3-dev tmux neovim tig mc hub
 RUN addgroup -g 1000 -S user && adduser -u 1000 -D -S ${username} -G user -G abuild
 RUN echo "${username} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
@@ -40,15 +43,22 @@ RUN sed -i.bkp -e \
 	'1s;^;/home/${username}/packages/main\n;' \
 	/etc/apk/repositories
 
+# Add Antibody shell package manager
+# FIXME: doesn't resolve in some networks
+# RUN curl -sL git.io/antibody | sh -s - -b /usr/bin
+COPY antibody /usr/bin/antibody
+
 # Set the proper shell
-# TODO: Use zsh
-ENV SHELL /bin/bash
+ENV SHELL /bin/zsh
 ENV TERM xterm-256color
 # Copy dotfiles
 COPY dotfiles /home/${username}
 RUN chown -R ${username}:user /home/${username}
 USER ${username}
 WORKDIR /home/${username}
+# Install zsh plugins
+RUN mkdir -p /home/${username}/.cache/antibody && \
+	zsh -c "source <(antibody init) && antibody update"
 # Set up the git
 RUN git config --global user.name "${realname}"
 RUN git config --global user.email "${email}"
@@ -56,6 +66,7 @@ RUN git config --global user.email "${email}"
 RUN pip3 install -U --user --no-color pynvim
 RUN nvim +PlugInstall +qall > /dev/null
 # Get the ports
+# TODO: cache this somehow?
 RUN git clone git://git.alpinelinux.org/aports
 
 ENTRYPOINT ["/bin/bash"]
