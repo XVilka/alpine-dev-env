@@ -30,7 +30,18 @@ RUN echo "PACKAGER_PRIVKEY=\"/home/${username}/.abuild/${keyname}.rsa\"" > \
 
 # Prepare the distfiles directories
 RUN mkdir -p /var/cache/distfiles && chmod g+w /var/cache/distfiles
+RUN sed -i.bkp -e \
+	'1s;^;/home/${username}/packages/testing\n;' \
+	/etc/apk/repositories && \
+	sed -i.bkp -e \
+	'1s;^;/home/${username}/packages/community\n;' \
+	/etc/apk/repositories && \
+	sed -i.bkp -e \
+	'1s;^;/home/${username}/packages/main\n;' \
+	/etc/apk/repositories
+
 # Set the proper shell
+# TODO: Use zsh
 ENV SHELL /bin/bash
 ENV TERM xterm-256color
 # Copy dotfiles
