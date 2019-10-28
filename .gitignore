@@ -4,3 +4,6 @@ dotfiles/*
 .*.swn
 *.un~
 *.log
+*.rsa
+*.rsa.pub
+
