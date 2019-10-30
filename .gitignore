@@ -1,4 +1,5 @@
 dotfiles/*
+aports/*
 .*.swp
 .*.swo
 .*.swn

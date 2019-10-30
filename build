@@ -8,10 +8,16 @@ SYNCPY="$DOTFILES/sync.py"
 NVIMCONFDIR=".local/share/nvim/site"
 VIMDIR="$DOTDIR/$NVIMCONFDIR"
 
+DOCKCMD="docker"
+# Prefer podman if installed
+if [ -x "$(command -v podman)" ]; then
+	DOCKCMD="podman"
+fi
+
 if [ -d dotfiles ]; then
     if [ -f "$SYNCPY" ]; then
-		echo "Running sync.py -c -t docker -p \"$DOTDIR\" -l \"$DOTLIST\" ..."
-		"$SYNCPY" -c -t docker -p "$DOTDIR" -l "$DOTLIST" || exit 1
+		echo "Running sync.py -c -t \"$DOCKCMD\" -p \"$DOTDIR\" -l \"$DOTLIST\" ..."
+		"$SYNCPY" -c -t $DOCKCMD -p "$DOTDIR" -l "$DOTLIST" || exit 1
 	fi
 	# Now install vim-plug
 	# Copy if exists in the $HOME directory, otherwise - download
@@ -25,4 +31,4 @@ if [ -d dotfiles ]; then
 	fi
 fi
 
-docker build -t alpine-dev .
+"$DOCKCMD" build -t alpine-dev .
