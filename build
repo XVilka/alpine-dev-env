@@ -16,8 +16,8 @@ fi
 
 if [ -d dotfiles ]; then
     if [ -f "$SYNCPY" ]; then
-		echo "Running sync.py -c -t \"$DOCKCMD\" -p \"$DOTDIR\" -l \"$DOTLIST\" ..."
-		"$SYNCPY" -c -t $DOCKCMD -p "$DOTDIR" -l "$DOTLIST" || exit 1
+		echo "Running sync.py -c -r -t \"$DOCKCMD\" -p \"$DOTDIR\" -l \"$DOTLIST\" ..."
+		"$SYNCPY" -c -r -t $DOCKCMD -p "$DOTDIR" -l "$DOTLIST" || exit 1
 	fi
 	# Now install vim-plug
 	# Copy if exists in the $HOME directory, otherwise - download

@@ -1,27 +1,30 @@
-FROM alpine:edge
-MAINTAINER Anton Kochkov <anton.kochkov@gmail.com>
-
 # Some variables
 ARG username=akochkov
 ARG realname="Anton Kochkov"
 ARG email="anton.kochkov@gmail.com"
 ARG keyname="anton.kochkov@gmail.com-5db6cdc1"
 
+FROM alpine:edge
+MAINTAINER ${realname} <${email}>
+
 # Enable "testing" repository
 RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> \
 	/etc/apk/repositories
-
 RUN apk add --no-cache alpine-sdk bash bash-doc bash-completion \
 	zsh zsh-vcs coreutils man python3 python3-dev tmux neovim tig mc hub
-RUN addgroup -g 1000 -S user && adduser -u 1000 -D -S ${username} -G user -G abuild
+
+# Setting up the user
+RUN addgroup -g 1000 -S user && \
+	adduser -u 1000 -D -S ${username} -G abuild && \
+	addgroup ${username} user
 RUN echo "${username} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Write abuild configuration
 RUN sed -i.bkp -e \
-	's/#PACKAGER="Your Name <your@email.address>"/PACKAGER="${realname} <${email}>"/g' \
+	"s/#PACKAGER=\"Your Name <your@email.address>\"/PACKAGER=\"${realname} <${email}>\"/g" \
 	/etc/abuild.conf
 RUN sed -i.bkp -e \
-	's/#MAINTAINER="$PACKAGER"/MAINTAINER="$PACKAGER"/g' \
+	"s/#MAINTAINER=\"$PACKAGER\"/MAINTAINER=\"$PACKAGER\"/g" \
 	/etc/abuild.conf
 
 # Copy the keys
@@ -34,13 +37,13 @@ RUN echo "PACKAGER_PRIVKEY=\"/home/${username}/.abuild/${keyname}.rsa\"" > \
 # Prepare the distfiles directories
 RUN mkdir -p /var/cache/distfiles && chmod g+w /var/cache/distfiles
 RUN sed -i.bkp -e \
-	'1s;^;/home/${username}/packages/testing\n;' \
+	"1s;^;/home/${username}/packages/testing\n;" \
 	/etc/apk/repositories && \
 	sed -i.bkp -e \
-	'1s;^;/home/${username}/packages/community\n;' \
+	"1s;^;/home/${username}/packages/community\n;" \
 	/etc/apk/repositories && \
 	sed -i.bkp -e \
-	'1s;^;/home/${username}/packages/main\n;' \
+	"1s;^;/home/${username}/packages/main\n;" \
 	/etc/apk/repositories
 
 # Add Antibody shell package manager
